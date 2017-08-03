@@ -22,5 +22,23 @@ componentDidMount() {
 
 ```
 
+### Properties
+
+#### Basic
+
+| Prop  | Default  | Type | Description |
+| :------------ |:---------------:| :---------------:| :-----|
+| showStepNum | true | `bool` | If `true`, the number tip will be shown. |
+| stopBtnTitle | true | `string` | Props to translate the Stop button. |
+| nextBtnTitle | 0 | `string` | Props to translate the Next button. |
+| prevBtnTitle | false | `string` | Props to translate the Prev button. |
+
+#### Custom basic style & content
+
+| Prop  | Default  | Type | Description |
+| :------------ |:---------------:| :---------------:| :-----|
+| customToolTipStyle | - | `style` | Tooltip style. |
+| customArrowStyle | - | `style` | Arrow style. |
+
 # Warning
  *This Component does not support your component Wrapped by `Redux connect` currently;*
