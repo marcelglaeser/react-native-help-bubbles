@@ -29,9 +29,9 @@ componentDidMount() {
 | Prop  | Default  | Type | Description |
 | :------------ |:---------------:| :---------------:| :-----|
 | showStepNum | true | `bool` | If `true`, the number tip will be shown. |
-| stopBtnTitle | true | `string` | Props to translate the Stop button. |
-| nextBtnTitle | 0 | `string` | Props to translate the Next button. |
-| prevBtnTitle | false | `string` | Props to translate the Prev button. |
+| stopBtnTitle | stop | `string` | Props to translate the Stop button. |
+| nextBtnTitle | next | `string` | Props to translate the Next button. |
+| prevBtnTitle | prev | `string` | Props to translate the Prev button. |
 
 #### Custom basic style & content
 
