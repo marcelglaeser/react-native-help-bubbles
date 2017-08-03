@@ -41,7 +41,7 @@ export default class HelpBubbles extends Component {
   }
 
   componentDidMount() {
-    const { group, showStepNum, step, content, disable, customToolTipStyle, customArrayStyle, stopBtnTitle, nextBtnTitle, prevBtnTitle } = this.props;
+    const { group, showStepNum, step, content, disable, customToolTipStyle, customArrowStyle, stopBtnTitle, nextBtnTitle, prevBtnTitle } = this.props;
 
     if (!groupMap[group || DEFAULT_GROUP]) {
       groupMap[group || DEFAULT_GROUP] = {};
@@ -54,7 +54,7 @@ export default class HelpBubbles extends Component {
         content,
         disable,
         customToolTipStyle,
-        customArrayStyle,
+        customArrowStyle,
         stopBtnTitle,
         nextBtnTitle,
         prevBtnTitle,
@@ -72,7 +72,7 @@ measure() {
 }
 
 componentWillUnmount() {
-  const { group, step, content, disable, customToolTipStyle, customArrayStyle, stopBtnTitle, nextBtnTitle, prevBtnTitle } = this.props;
+  const { group, step, content, disable, customToolTipStyle, customArrowStyle, stopBtnTitle, nextBtnTitle, prevBtnTitle } = this.props;
   var groupA = groupMap[group || DEFAULT_GROUP][step];
 
   if (groupA._index > 0) {
@@ -192,7 +192,7 @@ export function helpbubbles(opts = {}) {
     var currentStep = group[stepArr[index]];
     var content = currentStep.content;
     var customToolTipStyle = currentStep.customToolTipStyle;
-    var customArrayStyle = currentStep.customArrayStyle;
+    var customArrowStyle = currentStep.customArrowStyle;
     var stopBtnTitle = currentStep.stopBtnTitle;
     var nextBtnTitle = currentStep.nextBtnTitle;
     var prevBtnTitle = currentStep.prevBtnTitle;
@@ -228,7 +228,7 @@ export function helpbubbles(opts = {}) {
       refModal.currentStep = index+1;
       refModal.content = typeof content === 'string' ? <View><Text style={styles.toolTipContent}>{content}</Text></View> : content;
       refModal.customToolTipStyle = customToolTipStyle;
-      refModal.customArrayStyle = customArrayStyle;
+      refModal.customArrowStyle = customArrowStyle;
       refModal.stopBtnTitle = stopBtnTitle;
       refModal.nextBtnTitle = nextBtnTitle;
       refModal.prevBtnTitle = prevBtnTitle;
@@ -424,7 +424,7 @@ class HelpBubblesModal extends Component {
         </Animated.View>
         : null
       }
-      <Animated.View style={[styles.arrow, this.arrow, {opacity: this._aniOpacity}, this.customArrayStyle]}></Animated.View>
+      <Animated.View style={[styles.arrow, this.arrow, {opacity: this._aniOpacity}, this.customArrowStyle]}></Animated.View>
       <Animated.View style={[styles.toolTip, this.tooltip, {opacity: this._aniOpacity}, this.customToolTipStyle]}>
       <View style={{flex: 1}}>
       {this.content || null}
