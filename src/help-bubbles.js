@@ -40,7 +40,7 @@ export default class HelpBubbles extends Component {
   }
 
   componentDidMount() {
-    const { group, showStepNum, step, content, disable, center, customToolTipStyle, customArrowStyle, stopBtnTitle, nextBtnTitle, prevBtnTitle } = this.props;
+    const { group, showStepNum, step, content, disable, checkDisableEvent, center, willViewEvent, didViewEvent, cancelEvent, customToolTipStyle, customArrowStyle, stopBtnTitle, nextBtnTitle, prevBtnTitle } = this.props;
 
     if (!groupMap[group || DEFAULT_GROUP]) {
       groupMap[group || DEFAULT_GROUP] = {};
@@ -51,8 +51,9 @@ export default class HelpBubbles extends Component {
     if (!groupA[step]) {
       groupA[step] = {
         content,
-        disable,
+        disable, checkDisableEvent,
         center,
+        willViewEvent, didViewEvent, cancelEvent,
         customToolTipStyle,
         customArrowStyle,
         stopBtnTitle,
@@ -72,7 +73,7 @@ export default class HelpBubbles extends Component {
   }
 
   componentWillUnmount() {
-    const { group, step, content, disable, center, customToolTipStyle, customArrowStyle, stopBtnTitle, nextBtnTitle, prevBtnTitle } = this.props;
+    const { group, step, content, disable, checkDisableEvent, center, willViewEvent, didViewEvent, cancelEvent, customToolTipStyle, customArrowStyle, stopBtnTitle, nextBtnTitle, prevBtnTitle } = this.props;
     var groupA = groupMap[group || DEFAULT_GROUP][step];
 
     if (groupA._index > 0) {
@@ -158,6 +159,23 @@ export function helpbubbles(opts = {}) {
   * @return {[type]} [description]
   */
   function stop() {
+    var currentStep = group[stepArr[index]];
+    callDidViewEvent(index);
+    if(currentStep && currentStep.cancelEvent) {
+      currentStep.cancelEvent();
+    } else {
+      if(opts.cancelEvent) {
+          opts.cancelEvent();
+      }
+    }
+
+    clearHelpBubbles();
+  }
+
+  /**
+  * @return {[type]} [description]
+  */
+  function clearHelpBubbles() {
     clearTimeout(stepTimer);
     clearTimeout(timer);
     sibling.destroy();
@@ -168,21 +186,45 @@ export function helpbubbles(opts = {}) {
   /**
   * @return {Function} [description]
   */
-  function next() {
-    if (index >= len - 1) return;
-
+  function next(fromIndex) {
+    if (index >= len - 1) {
+      clearHelpBubbles();
+      return;
+    }
     index++;
-    toStep(index);
+
+    var currentStep = group[stepArr[index]];
+    if(currentStep && currentStep.disable) {
+      next(currentStep);
+    } else {
+      callDidViewEvent(fromIndex);
+      toStep(index);
+    }
   }
 
   /**
   * @return {[type]} [description]
   */
-  function prev() {
-    if (index <= 0) return;
-
+  function prev(fromIndex) {
+    if (index < 0) return;
     index--;
-    toStep(index);
+    var currentStep = group[stepArr[index]];
+    if(currentStep.disable) {
+      prev(currentStep);
+    } else {
+      callDidViewEvent(fromIndex);
+      toStep(index);
+    }
+  }
+
+  /**
+  * @return {Function} [description]
+  */
+  function callDidViewEvent(fromIndex) {
+    var step = group[stepArr[fromIndex]];
+    if(step.didViewEvent) {
+      step.didViewEvent();
+    }
   }
 
   /**
@@ -190,8 +232,15 @@ export function helpbubbles(opts = {}) {
   */
   function toStep(index) {
     var currentStep = group[stepArr[index]];
+    if(currentStep.disable || currentStep.checkDisableEvent && currentStep.checkDisableEvent()){
+      next(index);
+      return;
+    }
     var content = currentStep.content;
     var center = currentStep.center;
+    var willViewEvent = currentStep.willViewEvent;
+    var didViewEvent = currentStep.didViewEvent;
+    var cancelEvent = currentStep.cancelEvent;
     var customToolTipStyle = currentStep.customToolTipStyle;
     var customArrowStyle = currentStep.customArrowStyle;
     var stopBtnTitle = currentStep.stopBtnTitle;
@@ -199,14 +248,19 @@ export function helpbubbles(opts = {}) {
     var prevBtnTitle = currentStep.prevBtnTitle;
     target = currentStep.target;
     refTarget = currentStep.refTarget;
-
     element = target.html;
     /*element = cloneElement(element, {
     style: [element.props.style, {position: 'absolute',left: 0, top: 0}]
   });*/
 
-  refModal.innerElement = null;
-  refModal.forceUpdate();
+  if(currentStep.willViewEvent) {
+    currentStep.willViewEvent();
+  }
+
+  if(refModal) {
+    refModal.innerElement = null;
+    refModal.forceUpdate();
+  }
 
   new Promise((resolve, reject) => {
     refTarget.measure((x, y, width, height, pageX, pageY) => {
@@ -462,7 +516,7 @@ render() {
       borderColor: '#fff',
       marginRight: 20,
 
-    }]} onTouchStart={() => this.props.stop()}>
+    }]} onTouchStart={()=>this.props.stop()}>
     <Text style={[styles.buttonText, {
       color: '#fff'
     }]}>{this.stopBtnTitle ? this.stopBtnTitle : this.props.stopBtnTitle}</Text>
@@ -470,12 +524,12 @@ render() {
     </View>
     <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-end'}}>
     {this.currentStep > 1 ?
-      <View style={[styles.helpbubblesButton]} onTouchStart={() => this.props.prev()}>
+      <View style={[styles.helpbubblesButton]} onTouchStart={() => this.props.prev(this.currentStep-1)}>
       <Text style={[styles.buttonText]}>{this.prevBtnTitle ? this.prevBtnTitle : this.props.prevBtnTitle}</Text>
       </View>
       : null }
       {this.currentStep < this.props.len ?
-        <View style={[styles.helpbubblesButton, {marginLeft: 8, alignSelf: 'flex-end'}]} onTouchStart={() => this.props.next()}>
+        <View style={[styles.helpbubblesButton, {marginLeft: 8, alignSelf: 'flex-end'}]} onTouchStart={() => this.props.next(this.currentStep-1)}>
         <Text style={[styles.buttonText]}>{this.nextBtnTitle ? this.nextBtnTitle : this.props.nextBtnTitle}</Text>
         </View>
         : null }
